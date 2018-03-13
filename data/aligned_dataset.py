@@ -35,6 +35,24 @@ class AlignedDataset(BaseDataset):
         A = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))(A)
         B = transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))(B)
 
+        A_original = A.clone()
+        if self.opt.input_channels:
+          if len(self.opt.input_channels) == 1:
+            A[0, ...] = A_original[int(self.opt.input_channels[0]), ...]
+            A[1, ...] = A[0, ...] 
+            A[2, ...] = A[0, ...]
+          elif len(self.opt.input_channels) == 2:
+            A[0, ...] = A_original[int(self.opt.input_channels[0]), ...]
+            A[1, ...] = A_original[int(self.opt.input_channels[1]), ...]
+            A[2, ...] = A_original[0, ...] * 0.5 + tmp[1, ...] * 0.5
+        
+        if self.opt.output_channels:
+          # assume output only has at most one channel
+          if len(self.opt.output_channels) == 1:
+            B[0, ...] = A_original[int(self.opt.output_channels[0]), ...]
+            B[1, ...] = B[0, ...]
+            B[2, ...] = B[0, ...] 
+
         if self.opt.which_direction == 'BtoA':
             input_nc = self.opt.output_nc
             output_nc = self.opt.input_nc

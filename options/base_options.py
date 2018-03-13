@@ -12,7 +12,7 @@ class BaseOptions():
     def initialize(self):
         self.parser.add_argument('--dataroot', required=True, help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
         self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
-        self.parser.add_argument('--loadSize', type=int, default=286, help='scale images to this size')
+        self.parser.add_argument('--loadSize', type=int, default=256, help='scale images to this size') ## 286
         self.parser.add_argument('--fineSize', type=int, default=256, help='then crop to this size')
         self.parser.add_argument('--input_nc', type=int, default=3, help='# of input image channels')
         self.parser.add_argument('--output_nc', type=int, default=3, help='# of output image channels')
@@ -32,7 +32,7 @@ class BaseOptions():
         self.parser.add_argument('--norm', type=str, default='instance', help='instance normalization or batch normalization')
         self.parser.add_argument('--serial_batches', action='store_true', help='if true, takes images in order to make batches, otherwise takes them randomly')
         self.parser.add_argument('--display_winsize', type=int, default=256, help='display window size')
-        self.parser.add_argument('--display_id', type=int, default=1, help='window id of the web display')
+        self.parser.add_argument('--display_id', type=int, default=0, help='window id of the web display')
         self.parser.add_argument('--display_port', type=int, default=8097, help='visdom port of the web display')
         self.parser.add_argument('--no_dropout', action='store_true', help='no dropout for the generator')
         self.parser.add_argument('--max_dataset_size', type=int, default=float("inf"),
@@ -40,6 +40,11 @@ class BaseOptions():
         self.parser.add_argument('--resize_or_crop', type=str, default='resize_and_crop', help='scaling and cropping of images at load time [resize_and_crop|crop|scale_width|scale_width_and_crop]')
         self.parser.add_argument('--no_flip', action='store_true', help='if specified, do not flip the images for data augmentation')
         self.parser.add_argument('--init_type', type=str, default='normal', help='network initialization [normal|xavier|kaiming|orthogonal]')
+        self.parser.add_argument('--input_channels', nargs='+', help='select output channels, not set meaning all channels')
+        self.parser.add_argument('--output_channels', nargs='+', help='select output channels, 0|1|2, not set meaning MRA')
+        self.parser.add_argument('--gan_only', action='store_true', help='if specified, do not include content loss')        
+        self.parser.add_argument('--content_only', action='store_true', help='if specified, do not include gan loss')
+        self.parser.add_argument('--content_loss_type', type=str, default='L1', help='content loss type, L1|concept')
 
         self.initialized = True
 

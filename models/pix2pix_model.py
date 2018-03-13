@@ -5,7 +5,7 @@ import util.util as util
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
-
+from vgg import Vgg16
 
 class Pix2PixModel(BaseModel):
     def name(self):
@@ -29,11 +29,17 @@ class Pix2PixModel(BaseModel):
                 self.load_network(self.netD, 'D', opt.which_epoch)
 
         if self.isTrain:
-            self.fake_AB_pool = ImagePool(opt.pool_size)
-            # define loss functions
-            self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
-            self.criterionL1 = torch.nn.L1Loss()
-
+          self.fake_AB_pool = ImagePool(opt.pool_size)
+          # define loss functions
+          self.criterionGAN = networks.GANLoss(use_lsgan=not opt.no_lsgan, tensor=self.Tensor)
+          if opt.content_loss_type == 'percept':
+            self.vgg = Vgg16(requires_grad=False)
+            self.vgg_mse_loss = torch.nn.MSELoss()
+            if len(self.gpu_ids) > 0:
+              self.vgg.cuda(self.gpu_ids[0])
+            else:
+              self.criterionL1 = torch.nn.L1Loss()
+        
             # initialize optimizers
             self.schedulers = []
             self.optimizers = []
@@ -96,34 +102,58 @@ class Pix2PixModel(BaseModel):
         self.loss_D.backward()
 
     def backward_G(self):
-        # First, G(A) should fake the discriminator
-        fake_AB = torch.cat((self.real_A, self.fake_B), 1)
-        pred_fake = self.netD(fake_AB)
-        self.loss_G_GAN = self.criterionGAN(pred_fake, True)
+        if not self.opt.content_only:
+          # First, G(A) should fake the discriminator
+          fake_AB = torch.cat((self.real_A, self.fake_B), 1)
+          pred_fake = self.netD(fake_AB)
+          self.loss_G_GAN = self.criterionGAN(pred_fake, True)
 
         # Second, G(A) = B
-        self.loss_G_L1 = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
+        if not self.opt.gan_only:
+          if self.opt.content_loss_type == 'percept':
+            features_fake = self.vgg(self.fake_B)
+            features_real = self.vgg(self.real_B)
+            self.loss_G_content = self.vgg_mse_loss(features_fake.relu1_1, features_real.relu1_1) * self.opt.lambda_A #relu1_1 or relu1_2
+          else:
+            self.loss_G_content = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
 
-        self.loss_G = self.loss_G_GAN + self.loss_G_L1
+        if self.opt.gan_only:
+          self.loss_G = self.loss_G_GAN
+        elif self.opt.content_only:
+          self.loss_G = self.loss_G_content
+        else:  
+          self.loss_G = self.loss_G_GAN + self.loss_G_content
 
         self.loss_G.backward()
 
     def optimize_parameters(self):
         self.forward()
 
-        self.optimizer_D.zero_grad()
-        self.backward_D()
-        self.optimizer_D.step()
+        if not self.opt.content_only:
+          self.optimizer_D.zero_grad()
+          self.backward_D()
+          self.optimizer_D.step()
 
         self.optimizer_G.zero_grad()
         self.backward_G()
         self.optimizer_G.step()
 
     def get_current_errors(self):
-        return OrderedDict([('G_GAN', self.loss_G_GAN.data[0]),
-                            ('G_L1', self.loss_G_L1.data[0]),
-                            ('D_real', self.loss_D_real.data[0]),
-                            ('D_fake', self.loss_D_fake.data[0])
+        loss_D_real = 0
+        loss_D_fake = 0
+        loss_G_GAN = 0
+        if not self.opt.content_only:
+          loss_D_real = self.loss_D_real.data[0]
+          loss_D_fake = self.loss_D_fake.data[0]
+          loss_G_GAN = self.loss_G_GAN.data[0]
+        loss_G_content = 0
+        if not self.opt.gan_only:
+          loss_G_content = self.loss_G_content.data[0]
+
+        return OrderedDict([('G_GAN', loss_G_GAN),
+                            ('G_content', loss_G_content),
+                            ('D_real', loss_D_real),
+                            ('D_fake', loss_D_fake)
                             ])
 
     def get_current_visuals(self):
