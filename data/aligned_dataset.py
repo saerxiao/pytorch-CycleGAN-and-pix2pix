@@ -5,7 +5,7 @@ import torch
 from data.base_dataset import BaseDataset
 from data.image_folder import make_dataset
 from PIL import Image
-
+import numpy as np
 
 class AlignedDataset(BaseDataset):
     def initialize(self, opt):
@@ -19,6 +19,12 @@ class AlignedDataset(BaseDataset):
         AB_path = self.AB_paths[index]
         AB = Image.open(AB_path).convert('RGB')
         AB = AB.resize((self.opt.loadSize * 2, self.opt.loadSize), Image.BICUBIC)
+        if self.opt.random_rotation:
+          degree = np.random.rand() * 360
+          w, h = AB.size[0], AB.size[1]
+          A_img = AB.crop((0,0,int(w/2),h)).rotate(degree)
+          B_img = AB.crop((int(w/2), 0, w, h)).rotate(degree)
+          AB = Image.fromarray(np.concatenate([np.asarray(A_img), np.asarray(B_img)], 1))
         AB = transforms.ToTensor()(AB)
 
         w_total = AB.size(2)
@@ -44,7 +50,7 @@ class AlignedDataset(BaseDataset):
           elif len(self.opt.input_channels) == 2:
             A[0, ...] = A_original[int(self.opt.input_channels[0]), ...]
             A[1, ...] = A_original[int(self.opt.input_channels[1]), ...]
-            A[2, ...] = A_original[0, ...] * 0.5 + tmp[1, ...] * 0.5
+            A[2, ...] = A_original[0, ...] * 0.5 + A_original[1, ...] * 0.5
         
         if self.opt.output_channels:
           # assume output only has at most one channel

@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=6 python test.py --dataroot /data/mri/data/qform_sliced --name t123_qform025_perceptOnly --model pix2pix --which_model_netG unet_128 --which_direction AtoB --dataset_mode unaligned_array --norm batch --content_only --loadSize 128 --fineSize 128 --serial_batches --content_loss_type percept --output_channels 0 2 5 --target_type qform025 --which_epoch 85

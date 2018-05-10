@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=7 python test.py --dataroot /data/mri/data/color_fa_sliced/t123_colorfa --name t123_colorfa_cgan_L1 --model pix2pix --which_model_netG unet_128 --which_direction AtoB --dataset_mode aligned --norm batch --loadSize 128 --fineSize 128

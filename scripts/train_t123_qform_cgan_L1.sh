@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python train.py --dataroot /data/mri/data/qform_sliced --name t123_qform_cgan_L1 --model pix2pix --which_model_netG unet_128 --which_direction AtoB --dataset_mode unaligned_array --no_lsgan --norm batch --pool_size 0 --lambda_A 1 --loadSize 128 --fineSize 128 --output_nc 6 --serial_batches

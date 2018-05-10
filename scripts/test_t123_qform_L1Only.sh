@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=6 python test.py --dataroot /data/mri/data/qform_sliced --name t123_qform_L1Only --model pix2pix --which_model_netG unet_128 --which_direction AtoB --dataset_mode unaligned_array --norm batch --content_only --loadSize 128 --fineSize 128 --output_nc 6 --serial_batches --target_type qform --which_epoch 85

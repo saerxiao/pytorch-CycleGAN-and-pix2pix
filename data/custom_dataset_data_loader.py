@@ -13,6 +13,12 @@ def CreateDataset(opt):
     elif opt.dataset_mode == 'single':
         from data.single_dataset import SingleDataset
         dataset = SingleDataset()
+    elif opt.dataset_mode == 'aligned_array':
+        from data.aligned_array import AlignedArray
+        dataset = AlignedArray()
+    elif opt.dataset_mode == 'unaligned_array':
+        from data.unaligned_array import UnalignedArray
+        dataset = UnalignedArray()
     else:
         raise ValueError("Dataset [%s] not recognized." % opt.dataset_mode)
 

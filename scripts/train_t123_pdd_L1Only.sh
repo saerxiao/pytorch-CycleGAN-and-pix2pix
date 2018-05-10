@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python train.py --dataroot /data/mri/data/pdd_sliced --name t123_pdd_L1Only --model pix2pix --which_model_netG unet_128 --which_direction AtoB --dataset_mode aligned_array --no_lsgan --norm batch --pool_size 0 --lambda_A 1 --content_only --loadSize 128 --fineSize 128

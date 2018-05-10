@@ -79,8 +79,13 @@ class Visualizer():
         if self.use_html and (save_result or not self.saved):  # save images to a html file
             self.saved = True
             for label, image_numpy in visuals.items():
-                img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.png' % (epoch, label))
-                util.save_image(image_numpy, img_path)
+                if image_numpy.shape[2] == 6:
+                  for ch in range(6):
+                    img_path = os.path.join(self.img_dir, 'epoch%.3d_%s_%d.png' % (epoch, label, ch))
+                    util.save_image(image_numpy[:,:,ch], img_path)
+                else:
+                  img_path = os.path.join(self.img_dir, 'epoch%.3d_%s.png' % (epoch, label))
+                  util.save_image(image_numpy, img_path)
             # update website
             webpage = html.HTML(self.web_dir, 'Experiment name = %s' % self.name, reflesh=1)
             for n in range(epoch, 0, -1):
@@ -117,17 +122,29 @@ class Visualizer():
     def print_current_errors(self, epoch, i, errors, t, t_data):
         message = '(epoch: %d, iters: %d, time: %.3f, data: %.3f) ' % (epoch, i, t, t_data)
         for k, v in errors.items():
-            message += '%s: %.3f ' % (k, v)
+            message += '%s: %.6f ' % (k, v)
 
         print(message)
         with open(self.log_name, "a") as log_file:
             log_file.write('%s\n' % message)
 
     # save image to the disk
-    def save_images(self, webpage, visuals, image_path, aspect_ratio=1.0):
+    def save_images(self, webpage, visuals, image_path=None, aspect_ratio=1.0, name=None):
+        def save_select_channels(im, select_channels, name, label, ims, txts, links):
+          image_name = '%s_%s.png' % (name, label)
+          save_path = os.path.join(image_dir, image_name)
+          im_tosave = np.zeros((im.shape[0], im.shape[1], 3))
+          for i in range(3):
+            im_tosave[:,:,i] = im[:,:,select_channels[i]]
+          util.save_image(im_tosave, save_path)
+          ims.append(image_name)
+          txts.append(label)
+          links.append(image_name)
+
         image_dir = webpage.get_image_dir()
-        short_path = ntpath.basename(image_path[0])
-        name = os.path.splitext(short_path)[0]
+        if not name:
+          short_path = ntpath.basename(image_path[0])
+          name = os.path.splitext(short_path)[0]
 
         webpage.add_header(name)
         ims = []
@@ -135,16 +152,21 @@ class Visualizer():
         links = []
 
         for label, im in visuals.items():
-            image_name = '%s_%s.png' % (name, label)
-            save_path = os.path.join(image_dir, image_name)
-            h, w, _ = im.shape
-            if aspect_ratio > 1.0:
-                im = imresize(im, (h, int(w * aspect_ratio)), interp='bicubic')
-            if aspect_ratio < 1.0:
-                im = imresize(im, (int(h / aspect_ratio), w), interp='bicubic')
-            util.save_image(im, save_path)
+          if im.shape[2] == 6:
+            save_select_channels(im, [0,2,5], name, '%s_025' % (label), ims, txts, links)
+            save_select_channels(im, [1,3,4], name, '%s_134' % (label), ims, txts, links)
+          else:
+            save_select_channels(im, [0,1,2], name, label, ims, txts, links)
+            #image_name = '%s_%s.png' % (name, label)
+            #save_path = os.path.join(image_dir, image_name)
+            #h, w, _ = im.shape
+            #if aspect_ratio > 1.0:
+            #    im = imresize(im, (h, int(w * aspect_ratio)), interp='bicubic')
+            #if aspect_ratio < 1.0:
+            #    im = imresize(im, (int(h / aspect_ratio), w), interp='bicubic')
+            #util.save_image(im, save_path)
 
-            ims.append(image_name)
-            txts.append(label)
-            links.append(image_name)
+            #ims.append(image_name)
+            #txts.append(label)
+            #links.append(image_name)
         webpage.add_images(ims, txts, links, width=self.win_size)

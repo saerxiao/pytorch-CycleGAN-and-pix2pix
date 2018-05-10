@@ -10,4 +10,6 @@ class TestOptions(BaseOptions):
         self.parser.add_argument('--phase', type=str, default='test', help='train, val, test, etc')
         self.parser.add_argument('--which_epoch', type=str, default='latest', help='which epoch to load? set to latest to use latest cached model')
         self.parser.add_argument('--how_many', type=int, default=float("inf"), help='how many test images to run')
+        self.parser.add_argument('--how_many_display', type=int, default=100, help='how many test images to display in the webpage')
+        self.parser.add_argument('--target_type', type=str, default='', help='pdd | qform025 | qform134 | qform')
         self.isTrain = False

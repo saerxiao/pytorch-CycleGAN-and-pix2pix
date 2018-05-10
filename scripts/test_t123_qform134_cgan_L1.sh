@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=0 python test.py --dataroot /data/mri/data/qform_sliced --name t123_qform134_cgan_L1 --model pix2pix --which_model_netG unet_128 --which_direction AtoB --dataset_mode unaligned_array --norm batch --loadSize 128 --fineSize 128 --serial_batches --output_channels 1 3 4 --target_type qform134

@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=7 python transform.py --dataroot /data/mri/data/raw-with-dti --name dti00_t1_L1Only --model pix2pix --which_model_netG unet_128 --which_direction AtoB --dataset_mode dti --norm batch --in_protocal DTI-00 --out_protocal T1 --content_only

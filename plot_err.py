@@ -58,5 +58,4 @@ def draw(name):
   outputpath = "checkpoints/{}/err.png".format(name)
   fig.savefig(outputpath)
 
-draw('t2_t1_L1Only')
-
+draw('t123_colorfa_cgan_L1')

@@ -9,6 +9,7 @@ parser.add_argument('--fold_B', dest='fold_B', help='input directory for image B
 parser.add_argument('--fold_AB', dest='fold_AB', help='output directory', type=str, default='../dataset/test_AB')
 parser.add_argument('--num_imgs', dest='num_imgs', help='number of images',type=int, default=1000000)
 parser.add_argument('--use_AB', dest='use_AB', help='if true: (0001_A, 0001_B) to (0001_AB)',action='store_true')
+parser.add_argument('--use_mask', dest='use_mask', help='if true: (0001, 0001_mask) to (0001)',action='store_true')
 args = parser.parse_args()
 
 for arg in vars(args):
@@ -33,10 +34,11 @@ for sp in splits:
         name_A = img_list[n]
         path_A = os.path.join(img_fold_A, name_A)
         if args.use_AB:
-            name_B = name_A.replace('_A.', '_B.')
+          name_B = name_A.replace('_A.', '_B.')
+        elif args.use_mask:
+          name_B = name_A.replace('.png', '_mask.png')
         else:
-            #name_B = name_A
-            name_B = name_A.replace('.png', '_mask.png')
+          name_B = name_A
         path_B = os.path.join(img_fold_B, name_B)
         if os.path.isfile(path_A) and os.path.isfile(path_B):
             name_AB = name_A

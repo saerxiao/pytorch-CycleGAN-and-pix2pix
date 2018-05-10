@@ -5,7 +5,7 @@ import util.util as util
 from util.image_pool import ImagePool
 from .base_model import BaseModel
 from . import networks
-from vgg import Vgg16
+from .vgg import Vgg16
 
 class Pix2PixModel(BaseModel):
     def name(self):
@@ -14,6 +14,9 @@ class Pix2PixModel(BaseModel):
     def initialize(self, opt):
         BaseModel.initialize(self, opt)
         self.isTrain = opt.isTrain
+        self.undo_norm = True
+        if opt.dataset_mode == 'unaligned_array':
+          self.undo_norm = False
 
         # load/define networks
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf,
@@ -37,20 +40,20 @@ class Pix2PixModel(BaseModel):
             self.vgg_mse_loss = torch.nn.MSELoss()
             if len(self.gpu_ids) > 0:
               self.vgg.cuda(self.gpu_ids[0])
-            else:
-              self.criterionL1 = torch.nn.L1Loss()
+          else:
+            self.criterionL1 = torch.nn.L1Loss()
         
-            # initialize optimizers
-            self.schedulers = []
-            self.optimizers = []
-            self.optimizer_G = torch.optim.Adam(self.netG.parameters(),
+          # initialize optimizers
+          self.schedulers = []
+          self.optimizers = []
+          self.optimizer_G = torch.optim.Adam(self.netG.parameters(),
+                                               lr=opt.lr, betas=(opt.beta1, 0.999))
+          self.optimizer_D = torch.optim.Adam(self.netD.parameters(),
                                                 lr=opt.lr, betas=(opt.beta1, 0.999))
-            self.optimizer_D = torch.optim.Adam(self.netD.parameters(),
-                                                lr=opt.lr, betas=(opt.beta1, 0.999))
-            self.optimizers.append(self.optimizer_G)
-            self.optimizers.append(self.optimizer_D)
-            for optimizer in self.optimizers:
-                self.schedulers.append(networks.get_scheduler(optimizer, opt))
+          self.optimizers.append(self.optimizer_G)
+          self.optimizers.append(self.optimizer_D)
+          for optimizer in self.optimizers:
+            self.schedulers.append(networks.get_scheduler(optimizer, opt))
 
         print('---------- Networks initialized -------------')
         networks.print_network(self.netG)
@@ -111,8 +114,8 @@ class Pix2PixModel(BaseModel):
         # Second, G(A) = B
         if not self.opt.gan_only:
           if self.opt.content_loss_type == 'percept':
-            features_fake = self.vgg(self.fake_B)
-            features_real = self.vgg(self.real_B)
+            features_fake = self.vgg(self.fake_B)  # *255, not much difference
+            features_real = self.vgg(self.real_B)  # *255
             self.loss_G_content = self.vgg_mse_loss(features_fake.relu1_1, features_real.relu1_1) * self.opt.lambda_A #relu1_1 or relu1_2
           else:
             self.loss_G_content = self.criterionL1(self.fake_B, self.real_B) * self.opt.lambda_A
@@ -160,6 +163,14 @@ class Pix2PixModel(BaseModel):
         real_A = util.tensor2im(self.real_A.data)
         fake_B = util.tensor2im(self.fake_B.data)
         real_B = util.tensor2im(self.real_B.data)
+        return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
+
+    ## return [0,1]
+    def get_current_numpy(self):
+        #print(self.real_A.data[0].min(), self.real_A.data[0].max(), self.fake_B.data[0].min(), self.fake_B.data[0].max(), self.real_B.data[0].min(), self.real_B.data[0].max())
+        real_A = util.tensor2np(self.real_A.data, undo_norm = self.undo_norm)
+        fake_B = util.tensor2np(self.fake_B.data, undo_norm = self.undo_norm)
+        real_B = util.tensor2np(self.real_B.data, undo_norm = self.undo_norm)
         return OrderedDict([('real_A', real_A), ('fake_B', fake_B), ('real_B', real_B)])
 
     def save(self, label):

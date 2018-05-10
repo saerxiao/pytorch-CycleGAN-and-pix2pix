@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from PIL import Image
 import os
-
+import scipy.misc
 
 # Converts a Tensor into a Numpy array
 # |imtype|: the desired type of the converted numpy array
@@ -12,8 +12,18 @@ def tensor2im(image_tensor, imtype=np.uint8):
     if image_numpy.shape[0] == 1:
         image_numpy = np.tile(image_numpy, (3, 1, 1))
     image_numpy = (np.transpose(image_numpy, (1, 2, 0)) + 1) / 2.0 * 255.0
-    return image_numpy.astype(imtype)
+    #return image_numpy.astype(imtype)
+    return image_numpy
 
+## return [0,1]
+def tensor2np(image_tensor, undo_norm = True):
+  image_numpy = image_tensor[0].cpu().float().numpy()
+  if image_numpy.shape[0] == 1:
+        image_numpy = np.tile(image_numpy, (3, 1, 1))
+  image_numpy = np.transpose(image_numpy, (1, 2, 0))
+  if undo_norm:
+    image_numpy = (image_numpy + 1) / 2.0
+  return image_numpy
 
 def diagnose_network(net, name='network'):
     mean = 0.0
@@ -28,9 +38,12 @@ def diagnose_network(net, name='network'):
     print(mean)
 
 
-def save_image(image_numpy, image_path):
-    image_pil = Image.fromarray(image_numpy)
-    image_pil.save(image_path)
+def save_image(image_numpy, image_path, imtype=np.uint8):
+    im = scipy.misc.toimage(image_numpy)
+    im.save(image_path)
+    #image_numpy = image_numpy.astype(imtype)
+    #image_pil = Image.fromarray(image_numpy)
+    #image_pil.save(image_path)
 
 
 def print_numpy(x, val=True, shp=False):

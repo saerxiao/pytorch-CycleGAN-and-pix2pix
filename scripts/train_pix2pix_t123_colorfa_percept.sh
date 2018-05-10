@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1 python train.py --dataroot /data/mri/data/color_fa_sliced/t123_colorfa --name t123_colorfa_cgan_percept --model pix2pix --which_model_netG unet_128 --which_direction AtoB --lambda_A 100 --dataset_mode aligned --no_lsgan --norm batch --pool_size 0 --loadSize 128 --fineSize 128 --content_loss_type percept

@@ -10,7 +10,7 @@ class BaseOptions():
         self.initialized = False
 
     def initialize(self):
-        self.parser.add_argument('--dataroot', required=True, help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
+        self.parser.add_argument('--dataroot', help='path to images (should have subfolders trainA, trainB, valA, valB, etc)')
         self.parser.add_argument('--batchSize', type=int, default=1, help='input batch size')
         self.parser.add_argument('--loadSize', type=int, default=256, help='scale images to this size') ## 286
         self.parser.add_argument('--fineSize', type=int, default=256, help='then crop to this size')
@@ -23,7 +23,7 @@ class BaseOptions():
         self.parser.add_argument('--n_layers_D', type=int, default=3, help='only used if which_model_netD==n_layers')
         self.parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
         self.parser.add_argument('--name', type=str, default='experiment_name', help='name of the experiment. It decides where to store samples and models')
-        self.parser.add_argument('--dataset_mode', type=str, default='unaligned', help='chooses how datasets are loaded. [unaligned | aligned | single]')
+        self.parser.add_argument('--dataset_mode', type=str, default='unaligned', help='chooses how datasets are loaded. [unaligned | aligned | single | aligned_array|dti]')
         self.parser.add_argument('--model', type=str, default='cycle_gan',
                                  help='chooses which model to use. cycle_gan, pix2pix, test')
         self.parser.add_argument('--which_direction', type=str, default='AtoB', help='AtoB or BtoA')
@@ -45,7 +45,9 @@ class BaseOptions():
         self.parser.add_argument('--gan_only', action='store_true', help='if specified, do not include content loss')        
         self.parser.add_argument('--content_only', action='store_true', help='if specified, do not include gan loss')
         self.parser.add_argument('--content_loss_type', type=str, default='L1', help='content loss type, L1|concept')
-
+        self.parser.add_argument('--random_rotation', action='store_true', help='if specified, do random rotation on the image')
+        self.parser.add_argument('--in_protocal', type=str, default='DTI-00', help='input protocal for DTI translation')
+        self.parser.add_argument('--out_protocal', type=str, default='T1', help='output protocal for DTI translation')
         self.initialized = True
 
     def parse(self):

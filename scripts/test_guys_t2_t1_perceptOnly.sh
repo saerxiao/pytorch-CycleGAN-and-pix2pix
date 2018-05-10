@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1 python test.py --dataroot /data/mri/data/res256-seperate-device/t123_mra --name t2_t1_perceptOnly_guys --model pix2pix --which_model_netG unet_256 --which_direction AtoB --dataset_mode aligned --norm batch --content_only --content_loss_type percept --input_channels 1 --output_channels 0  --which_epoch 75 --how_many_display 100000000
