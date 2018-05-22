@@ -22,13 +22,14 @@ import glob
 
 #sys.exit()
 
-optfiles = glob.glob("scripts/*.pkl")
+optfiles = glob.glob("scripts/myunet/*.pkl")
 models = []
 volume_dataset = None
 for filename in optfiles:
   with open(filename, 'rb') as f:
     opt = pickle.load(f)
-  output_dir = os.path.join(opt.results_dir, opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
+  name = '{}_big_displacement'.format(opt.name)
+  output_dir = os.path.join(opt.results_dir, name, '%s_%s' % (opt.phase, opt.which_epoch))
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   models.append({'model': create_model(opt), 'output_dir': output_dir})

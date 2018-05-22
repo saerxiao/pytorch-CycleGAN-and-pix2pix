@@ -11,8 +11,11 @@ import scipy.misc
 from torchvision import transforms
 from options.test_options import TestOptions
 from models.models import create_model
+import pickle
 
 opt = TestOptions().parse()
+with open('scripts/test_'+ opt.name + '.pkl', 'wb') as f:
+  pickle.dump(opt, f, pickle.HIGHEST_PROTOCOL)
 
 model = create_model(opt)
 
@@ -58,6 +61,6 @@ for i, data in enumerate(volume_dataset):
   outputImg = nib.Nifti1Image(output.permute(1,2,0).numpy(), data['affine'])
   nib.save(outputImg, "%s/%s-%s_transformed_predict.nii.gz" % (output_dir, data['volId'], opt.out_protocal)) 
   cnt = cnt + 1
-  #if cnt > 0:
-  #  break
+  if cnt > 0:
+    break
 

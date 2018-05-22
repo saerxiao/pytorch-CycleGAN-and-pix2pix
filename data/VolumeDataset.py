@@ -11,13 +11,13 @@ from torchvision import transforms
 import re
 
 def translate(shape, zoom):
-  translation_range = 0.05 ## 0.2, [-translation_range, translation_range]
+  translation_range = 0.1 ## 0.1, 0.05, [-translation_range, translation_range]
   unit = np.multiply(shape, zoom)
   delta = np.multiply(np.random.rand(3)*translation_range*2-translation_range, unit)
   translate = np.array([[1,0,0,delta[0]],[0,1,0,delta[1]],[0,0,1,delta[2]],[0,0,0,1]])
   return translate
 
-rot_range = 15. #45, [-rot_range, rot_range]
+rot_range = 45. #45, 15, [-rot_range, rot_range]
 def xRotation():
   theta = np.random.rand()*rot_range*2 - rot_range
   rotation = np.array([[1,0,0,0],
@@ -43,7 +43,7 @@ def zRotation():
   return rotation
 
 def scale():
-  r = 0.1 #0.2, [-0.2, 0.2]
+  r = 0.2 #0.2, 0.1 [-0.2, 0.2]
   sx = 1 + np.random.rand()*r*2 - r
   sy = 1 + np.random.rand()*r*2 - r
   sz = 1 + np.random.rand()*r*2 - r
