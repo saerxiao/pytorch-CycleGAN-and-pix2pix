@@ -4,7 +4,7 @@ from util import html
 import os
 from nilearn.image import resample_img
 
-rootdir = '/data/pix2pix-pytorch/pytorch-CycleGAN-and-pix2pix/results/dti00_t1_cgan/test_latest'
+rootdir = '/data/pix2pix-pytorch/pytorch-CycleGAN-and-pix2pix/results/dti00_t1_cgan_myunet_no_eval/test_latest'
 volId = 'IXI131-HH-1527'
 web_dir = '{}/web'.format(rootdir)
 img_dir = '{}/images'.format(web_dir)

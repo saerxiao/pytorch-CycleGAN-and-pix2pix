@@ -149,6 +149,10 @@ def define_D(input_nc, ndf, which_model_netD,
     init_weights(netD, init_type=init_type)
     return netD
 
+def print_isTraining(net):
+  print("{}: training = {}".format(net.__class__.__name__, net.training))
+  for key, module in net._modules.items():
+    print_isTraining(module)
 
 def print_network(net):
     num_params = 0
@@ -156,7 +160,8 @@ def print_network(net):
         num_params += param.numel()
     print(net)
     print('Total number of parameters: %d' % num_params)
-
+    for key, module in net._modules.items():
+      mod_str = repr(module)
 
 ##############################################################################
 # Classes

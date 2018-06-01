@@ -17,8 +17,10 @@ opt = TestOptions().parse()
 with open('scripts/test_'+ opt.name + '.pkl', 'wb') as f:
   pickle.dump(opt, f, pickle.HIGHEST_PROTOCOL)
 
+eval_mode = False
 model = create_model(opt)
-
+if eval_mode:
+  model.eval()
 def _toTensor(nibImg):
   img = scipy.misc.toimage(nibImg).convert('RGB')
   img = transforms.ToTensor()(img)

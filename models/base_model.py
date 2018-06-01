@@ -12,6 +12,7 @@ class BaseModel():
         self.isTrain = opt.isTrain
         self.Tensor = torch.cuda.FloatTensor if self.gpu_ids else torch.Tensor
         self.save_dir = os.path.join(opt.checkpoints_dir, opt.name)
+        self.model_names = []
 
     def set_input(self, input):
         self.input = input
@@ -37,6 +38,14 @@ class BaseModel():
 
     def save(self, label):
         pass
+
+    # make models eval mode during test time
+    def eval(self):
+        for name in self.model_names:
+            print("-----------{}---------".format(name))
+            if isinstance(name, str):
+                net = getattr(self, 'net' + name)
+                net.eval()
 
     # helper saving function that can be used by subclasses
     def save_network(self, network, network_label, epoch_label, gpu_ids):

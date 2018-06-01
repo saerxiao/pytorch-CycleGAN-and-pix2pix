@@ -7,7 +7,9 @@ from util import html
 import ntpath
 import numpy as np
 import pickle
+import sys
 
+eval_mode = False  ## the test results look much worse when using eval mode for dti -> T1 transformation, hasn't tested for other transformations yet. Don't know why!!
 opt = TestOptions().parse()
 opt.nThreads = 1   # test code only supports nThreads = 1
 opt.batchSize = 1  # test code only supports batchSize = 1
@@ -17,6 +19,8 @@ opt.no_flip = True  # no flip
 data_loader = CreateDataLoader(opt)
 dataset = data_loader.load_data()
 model = create_model(opt)
+if eval_mode:
+  model.eval()
 visualizer = Visualizer(opt)
 # create website
 web_dir = os.path.join(opt.results_dir, opt.name, '%s_%s' % (opt.phase, opt.which_epoch))
@@ -41,6 +45,9 @@ elif 'qform' in opt.target_type:
   elif opt.target_type == 'qform134':
     a, b = rescale_range['min134'], rescale_range['max134']
   
+model.print_isTraining()
+sys.exit()
+
 for i, data in enumerate(dataset):
     if i >= opt.how_many:
         break

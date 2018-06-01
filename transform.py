@@ -23,16 +23,21 @@ import glob
 #sys.exit()
 
 optfiles = glob.glob("scripts/myunet/*.pkl")
+name_suffix = 'no_eval' ## big_displacement
+eval_mode = False
 models = []
 volume_dataset = None
 for filename in optfiles:
   with open(filename, 'rb') as f:
     opt = pickle.load(f)
-  name = '{}_big_displacement'.format(opt.name)
+  name = '{}_{}'.format(opt.name, name_suffix)
   output_dir = os.path.join(opt.results_dir, name, '%s_%s' % (opt.phase, opt.which_epoch))
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
-  models.append({'model': create_model(opt), 'output_dir': output_dir})
+  model = create_model(opt)
+  if eval_mode:
+    model.eval()  ## don't know why turning on the eval mode make things much worse
+  models.append({'model': model, 'output_dir': output_dir})
   if not volume_dataset:
     datadir = "{}/test".format(opt.dataroot)
     volume_dataset = VolumeDataset(datadir, opt.in_protocal, opt.out_protocal, transform=True)
@@ -77,6 +82,5 @@ for i, data in enumerate(volume_dataset):
     nib.save(volInput, "%s/%s-%s_transformed.nii.gz" % (output_dir, data['volId'], opt.in_protocal))
     nib.save(data['B_original'], "%s/%s-%s.nii.gz" % (output_dir, data['volId'], opt.out_protocal))
   cnt = cnt + 1
-  #if cnt > 0:
-  #  break
-
+  if cnt > 0:
+    break

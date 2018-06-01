@@ -18,6 +18,11 @@ class Pix2PixModel(BaseModel):
         if opt.dataset_mode == 'unaligned_array':
           self.undo_norm = False
 
+        if self.isTrain:
+            self.model_names = ['G', 'D']
+        else:  # during test time, only load Gs
+            self.model_names = ['G']
+
         # load/define networks
         self.netG = networks.define_G(opt.input_nc, opt.output_nc, opt.ngf,
                                       opt.which_model_netG, opt.norm, not opt.no_dropout, opt.init_type, self.gpu_ids)
@@ -176,3 +181,8 @@ class Pix2PixModel(BaseModel):
     def save(self, label):
         self.save_network(self.netG, 'G', label, self.gpu_ids)
         self.save_network(self.netD, 'D', label, self.gpu_ids)
+
+    def print_isTraining(self):
+      networks.print_isTraining(self.netG)
+      if self.isTrain:
+        networks.print_isTraining(self.netD)
